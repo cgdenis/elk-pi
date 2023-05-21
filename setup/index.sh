@@ -1,8 +1,15 @@
-
 #!/bin/bash
 
+echo "Enter Elasticsearch credentials to create index mappings:"
+#create elasticsearch data view
+read -p "username: " username
+
+# Prompt for password
+read -s -p "password: " password
+echo
+
 #create elasticsearch mappings for tshark
-curl -X PUT "localhost:9200/_index_template/packets?pretty" -H 'Content-Type: application/json' -d'
+response=$(curl -s -u $username:$password -X PUT "localhost:9200/_index_template/packets?pretty" -H 'Content-Type: application/json' -d'
 {
    "index_patterns": "packets-*",
     "template": {
@@ -65,22 +72,24 @@ curl -X PUT "localhost:9200/_index_template/packets?pretty" -H 'Content-Type: ap
   }
 }
 '
+)
+echo $response
 
-echo "Now provide Kibana credentials to create data view:"
-#create elasticsearch data view
-read -p "Enter username: " username
+# Check if the response is JSON "{ "acknowledged" : true }"
+if [[ $response == *"\"acknowledged\" : true"* ]]; then
+  echo "Enter Kibana credentials to create index mappings:"
+  #create elasticsearch data view
+  read -p "username: " username
 
-# Prompt for password
-read -s -p "Enter password: " password
-echo
+  # Prompt for password
+  read -s -p "password: " password
+  echo
 
-data="username=$username&password=$password"
-
-curl -u $username:$password -X POST "localhost:5601/api/data_views/data_view" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
-{
-  "data_view": {
-     "title": "packets-*",
-     "name": "Packets Capture"
-  }
-}
-'
+  curl -u $username:$password -X POST "localhost:5601/api/data_views/data_view" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+  {
+    "data_view": {
+      "title": "packets-*",
+      "name": "Packets Capture"
+    }
+  }'
+fi

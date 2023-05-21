@@ -66,7 +66,7 @@ curl -X PUT "localhost:9200/_index_template/packets?pretty" -H 'Content-Type: ap
 }
 '
 
-
+echo "Now provide Kibana credentials to create data view:"
 #create elasticsearch data view
 read -p "Enter username: " username
 
@@ -80,7 +80,7 @@ curl -u $username:$password -X POST "localhost:5601/api/data_views/data_view" -H
 {
   "data_view": {
      "title": "packets-*",
-     "name": "Packets Capture Data View"
+     "name": "Packets Capture"
   }
 }
 '
